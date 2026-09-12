@@ -17,6 +17,7 @@ import {
   Compass,
   Bookmark,
   Navigation,
+  Camera,
 } from 'lucide-react';
 import StarRating from '@/components/StarRating';
 import { getTags } from '@/lib/restaurants';
@@ -363,7 +364,7 @@ export default function AddRestaurantPage() {
 
           {/* 1. Upload ảnh: Món ăn & Không gian (Tối đa 5) */}
           <div className="bg-white rounded-[2rem] p-4.5 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div>
                 <h2 className="text-sm font-bold text-stone-900 flex items-center gap-1.5">
                   <span>📸 Ảnh món ăn & Không gian quán</span>
@@ -371,6 +372,36 @@ export default function AddRestaurantPage() {
                 </h2>
                 <p className="text-[11px] text-stone-500 mt-0.5">Ảnh đầu tiên sẽ được chọn làm ảnh bìa đại diện của quán</p>
               </div>
+
+              {foodPhotos.length < 5 && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {/* Nút chụp camera trực tiếp */}
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#163323] hover:bg-[#1e442f] text-white text-[11px] font-bold shadow-xs active:scale-95 transition-all cursor-pointer">
+                    <Camera className="w-3.5 h-3.5 text-[#D4A373]" />
+                    <span>Chụp ngay</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleFoodPhotoChange}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Nút chọn từ thư viện */}
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-[11px] font-bold border border-stone-200/80 active:scale-95 transition-all cursor-pointer">
+                    <UploadCloud className="w-3.5 h-3.5 text-stone-500" />
+                    <span>Thư viện</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/png, image/jpeg, image/webp"
+                      onChange={handleFoodPhotoChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 sm:gap-3">
@@ -392,10 +423,26 @@ export default function AddRestaurantPage() {
                 </div>
               ))}
 
+              {/* Ô bấm chụp trực tiếp */}
               {foodPhotos.length < 5 && (
-                <label className="aspect-square rounded-2xl border-2 border-dashed border-stone-200 hover:border-[#163323]/50 bg-[#FAF8F5]/60 flex flex-col items-center justify-center cursor-pointer transition-colors p-2 text-center group">
-                  <UploadCloud className="w-5 h-5 text-stone-400 group-hover:text-[#163323] mb-1 transition-colors" />
-                  <span className="text-[11px] font-bold text-stone-600 group-hover:text-[#163323]">Thêm món</span>
+                <label className="aspect-square rounded-2xl border-2 border-dashed border-[#163323]/35 hover:border-[#163323] bg-[#163323]/5 flex flex-col items-center justify-center cursor-pointer transition-all p-2 text-center group active:scale-95 shadow-xs">
+                  <Camera className="w-5 h-5 text-[#163323] mb-1 group-hover:scale-110 transition-transform" />
+                  <span className="text-[10.5px] font-bold text-[#163323]">Chụp ngay</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFoodPhotoChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
+
+              {/* Ô bấm chọn từ thư viện (nếu còn từ 2 chỗ trống trở lên) */}
+              {foodPhotos.length < 4 && (
+                <label className="aspect-square rounded-2xl border-2 border-dashed border-stone-200 hover:border-stone-400 bg-[#FAF8F5]/60 flex flex-col items-center justify-center cursor-pointer transition-all p-2 text-center group active:scale-95">
+                  <UploadCloud className="w-5 h-5 text-stone-400 group-hover:text-stone-700 mb-1 group-hover:scale-110 transition-transform" />
+                  <span className="text-[10.5px] font-bold text-stone-600 group-hover:text-stone-800">Thư viện</span>
                   <input
                     type="file"
                     multiple
@@ -410,15 +457,45 @@ export default function AddRestaurantPage() {
 
           {/* 1.2. Upload ảnh: Menu & Bảng giá quán (Tối đa 5) */}
           <div className="bg-white rounded-[2rem] p-4.5 sm:p-7 border border-[#C85A32]/20 shadow-[0_2px_12px_rgba(200,90,50,0.03)] space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div>
                 <h2 className="text-sm font-bold text-stone-900 flex items-center gap-1.5">
                   <span className="text-[#C85A32]">📋</span>
                   <span>Ảnh Menu & Bảng giá</span>
                   <span className="text-xs font-normal text-stone-500">({menuPhotos.length}/5 ảnh)</span>
                 </h2>
-                <p className="text-[11px] text-stone-500 mt-0.5">Chụp các trang menu, đồ uống, combo... để người xem tra cứu 100% rõ nét</p>
+                <p className="text-[11px] text-stone-500 mt-0.5">Chụp trực tiếp các trang thực đơn, đồ uống, combo... rõ nét</p>
               </div>
+
+              {menuPhotos.length < 5 && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {/* Nút chụp menu trực tiếp */}
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#C85A32] hover:bg-[#b54f2a] text-white text-[11px] font-bold shadow-xs active:scale-95 transition-all cursor-pointer">
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Chụp Menu</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleMenuPhotoChange}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Nút chọn từ thư viện */}
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-[11px] font-bold border border-stone-200/80 active:scale-95 transition-all cursor-pointer">
+                    <UploadCloud className="w-3.5 h-3.5 text-stone-500" />
+                    <span>Thư viện</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/png, image/jpeg, image/webp"
+                      onChange={handleMenuPhotoChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 sm:gap-3">
@@ -438,10 +515,26 @@ export default function AddRestaurantPage() {
                 </div>
               ))}
 
+              {/* Ô bấm chụp menu trực tiếp */}
               {menuPhotos.length < 5 && (
-                <label className="aspect-square rounded-2xl border-2 border-dashed border-[#C85A32]/30 hover:border-[#C85A32] bg-[#FAF8F5]/60 flex flex-col items-center justify-center cursor-pointer transition-colors p-2 text-center group">
+                <label className="aspect-square rounded-2xl border-2 border-dashed border-[#C85A32]/40 hover:border-[#C85A32] bg-[#C85A32]/6 flex flex-col items-center justify-center cursor-pointer transition-all p-2 text-center group active:scale-95 shadow-xs">
+                  <Camera className="w-5 h-5 text-[#C85A32] mb-1 group-hover:scale-110 transition-transform" />
+                  <span className="text-[10.5px] font-bold text-[#C85A32]">Chụp Menu</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleMenuPhotoChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
+
+              {/* Ô bấm chọn từ thư viện */}
+              {menuPhotos.length < 4 && (
+                <label className="aspect-square rounded-2xl border-2 border-dashed border-stone-200 hover:border-[#C85A32]/50 bg-[#FAF8F5]/60 flex flex-col items-center justify-center cursor-pointer transition-all p-2 text-center group active:scale-95">
                   <UploadCloud className="w-5 h-5 text-stone-400 group-hover:text-[#C85A32] mb-1 transition-colors" />
-                  <span className="text-[11px] font-bold text-stone-600 group-hover:text-[#C85A32]">Thêm Menu</span>
+                  <span className="text-[10.5px] font-bold text-stone-600 group-hover:text-[#C85A32]">Thư viện</span>
                   <input
                     type="file"
                     multiple

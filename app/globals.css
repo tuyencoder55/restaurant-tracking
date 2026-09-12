@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #FAF8F5;
+    color: #1C1917;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Tùy chỉnh thanh cuộn ngang mượt mà cho chip và carousel */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Tinh chỉnh popup bản đồ Leaflet theo phong cách sang trọng */
+.leaflet-popup-content-wrapper {
+  border-radius: 1.25rem !important;
+  padding: 0.25rem !important;
+  border: 1px solid rgba(22, 51, 35, 0.08) !important;
+  box-shadow: 0 20px 35px -10px rgba(22, 51, 35, 0.12), 0 10px 15px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.leaflet-popup-content {
+  margin: 0.5rem !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-container {
+  font-family: inherit !important;
+}
+
+/* Hiệu ứng viền kép tinh tế (Double-Bezel) */
+.double-bezel {
+  box-shadow: 
+    0 0 0 1px rgba(28, 25, 23, 0.05),
+    0 1px 2px 0 rgba(28, 25, 23, 0.04),
+    0 12px 28px -4px rgba(22, 51, 35, 0.06);
+}
+
+.double-bezel:hover {
+  box-shadow: 
+    0 0 0 1px rgba(22, 51, 35, 0.15),
+    0 4px 12px 0 rgba(28, 25, 23, 0.05),
+    0 20px 36px -4px rgba(22, 51, 35, 0.12);
+}

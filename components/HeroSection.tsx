@@ -42,24 +42,24 @@ export default function HeroSection({
           </div>
 
           {/* Main Title */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-stone-900 tracking-tight leading-[1.15]">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-stone-900 tracking-tight leading-[1.2]">
             Những góc quán giữ trọn{' '}
-            <span className="text-[#163323] underline decoration-[#D4A373]/60 decoration-wavy decoration-2 underline-offset-8">
+            <span className="text-[#163323] underline decoration-[#D4A373]/60 decoration-wavy decoration-2 underline-offset-6 sm:underline-offset-8">
               phong vị thành phố
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-sm sm:text-base text-stone-600 leading-relaxed max-w-xl">
+          <p className="text-xs sm:text-base text-stone-600 leading-relaxed max-w-xl">
             Lưu giữ những hương vị đáng nhớ, từ hàng quán gia đình mộc mạc đến điểm hẹn cà phê thân thuộc. Mở bản đồ tìm kiếm hoặc để la bàn chọn ngẫu nhiên món ngon cho bạn!
           </p>
 
           {/* Main Action Buttons */}
-          <div className="pt-2 flex flex-wrap items-center gap-3">
+          <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
             <button
               type="button"
               onClick={onOpenRandom}
-              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-[#163323] hover:bg-[#1e442f] text-white font-bold text-sm shadow-md shadow-[#163323]/25 active:scale-97 transition-all cursor-pointer group"
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-[#163323] hover:bg-[#1e442f] text-white font-bold text-sm shadow-md shadow-[#163323]/25 active:scale-97 transition-all cursor-pointer group"
             >
               <Compass className="w-4 h-4 text-[#D4A373] group-hover:rotate-45 transition-transform duration-300" />
               <span>Gợi ý vị ngẫu nhiên</span>
@@ -68,7 +68,7 @@ export default function HeroSection({
             <button
               type="button"
               onClick={onViewMap}
-              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-full bg-white hover:bg-stone-50 border border-stone-200/90 text-stone-800 font-semibold text-sm shadow-xs active:scale-97 transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-full bg-white hover:bg-stone-50 border border-stone-200/90 text-stone-800 font-semibold text-sm shadow-xs active:scale-97 transition-all cursor-pointer"
             >
               <MapPin className="w-4 h-4 text-[#C85A32]" />
               <span>Xem trên bản đồ</span>
@@ -76,16 +76,16 @@ export default function HeroSection({
           </div>
 
           {/* Quick Metrics */}
-          <div className="pt-4 border-t border-stone-200/60 flex items-center gap-6 text-xs text-stone-600">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#163323]" />
+          <div className="pt-3.5 border-t border-stone-200/60 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-stone-600">
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <span className="w-2 h-2 rounded-full bg-[#163323] shrink-0" />
               <span>
                 <strong className="text-stone-900 text-sm">{totalCount}</strong> địa điểm đã lưu
               </span>
             </div>
-            <span className="text-stone-300">•</span>
-            <div className="flex items-center gap-1.5 text-stone-700">
-              <Flame className="w-3.5 h-3.5 text-[#C85A32]" />
+            <span className="text-stone-300 hidden sm:inline">•</span>
+            <div className="flex items-center gap-1.5 text-stone-700 whitespace-nowrap">
+              <Flame className="w-3.5 h-3.5 text-[#C85A32] shrink-0" />
               <span>
                 <strong className="text-stone-900 text-sm">{favoriteCount}</strong> quán ruột 5 sao
               </span>

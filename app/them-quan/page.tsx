@@ -16,10 +16,11 @@ import {
   ArrowRight,
   Compass,
   Bookmark,
+  Navigation,
 } from 'lucide-react';
 import StarRating from '@/components/StarRating';
 import { getTags } from '@/lib/restaurants';
-import { geocodeAddress } from '@/lib/geocoding';
+import { geocodeAddress, reverseGeocode } from '@/lib/geocoding';
 import { compressImage } from '@/lib/upload';
 import { createRestaurantAction, uploadPhotoAction, checkAdminAuthAction } from '@/app/actions';
 import { Tag } from '@/types';
@@ -39,6 +40,7 @@ export default function AddRestaurantPage() {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [isLocatingCurrent, setIsLocatingCurrent] = useState(false);
   const [geocodeSuccess, setGeocodeSuccess] = useState(false);
 
   const [rating, setRating] = useState(5);
@@ -89,6 +91,48 @@ export default function AddRestaurantPage() {
     } finally {
       setIsGeocoding(false);
     }
+  };
+
+  // Tự động lấy vị trí hiện tại đang đứng và điền địa chỉ (Reverse Geocoding)
+  const handleUseCurrentLocation = () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      alert('Trình duyệt của bạn không hỗ trợ định vị GPS.');
+      return;
+    }
+
+    setIsLocatingCurrent(true);
+    setGeocodeSuccess(false);
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setLatitude(lat);
+        setLongitude(lng);
+        setGeocodeSuccess(true);
+
+        try {
+          const streetAddr = await reverseGeocode(lat, lng);
+          if (streetAddr) {
+            setAddress(streetAddr);
+          }
+        } catch (err) {
+          console.warn('Không thể tự động chuyển đổi địa chỉ:', err);
+        } finally {
+          setIsLocatingCurrent(false);
+        }
+      },
+      (err) => {
+        console.warn('Geolocation error:', err);
+        setIsLocatingCurrent(false);
+        let msg = 'Không thể lấy toạ độ hiện tại. Vui lòng cho phép quyền truy cập vị trí trên trình duyệt.';
+        if (err.code === err.PERMISSION_DENIED) {
+          msg = 'Bạn đã từ chối quyền truy cập vị trí. Hãy bật lại quyền vị trí trong cài đặt trình duyệt để tự động lấy địa chỉ.';
+        }
+        alert(msg);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
   };
 
   // Chọn ảnh từ máy
@@ -340,11 +384,32 @@ export default function AddRestaurantPage() {
               />
             </div>
 
-            {/* Địa chỉ + Nút tìm toạ độ (chống tràn trên mobile) */}
+            {/* Địa chỉ + Nút vị trí hiện tại */}
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1.5">
-                Địa chỉ <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                <label className="text-xs font-semibold text-stone-700">
+                  Địa chỉ <span className="text-rose-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={handleUseCurrentLocation}
+                  disabled={isLocatingCurrent}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#163323] hover:text-[#C85A32] bg-[#163323]/6 hover:bg-[#163323]/12 active:scale-95 px-2.5 py-1 rounded-full border border-[#163323]/15 transition-all cursor-pointer shrink-0 disabled:opacity-60"
+                  title="Lấy địa chỉ và toạ độ nơi bạn đang đứng"
+                >
+                  {isLocatingCurrent ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin text-[#C85A32]" />
+                      <span>Đang lấy vị trí...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Navigation className="w-3 h-3 text-[#C85A32]" />
+                      <span>📍 Dùng vị trí hiện tại</span>
+                    </>
+                  )}
+                </button>
+              </div>
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"

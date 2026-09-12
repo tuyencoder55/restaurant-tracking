@@ -237,25 +237,25 @@ export default function AddRestaurantPage() {
   return (
     <div className="min-h-screen bg-[#FAF8F5] pb-24">
       {/* Top Floating Bar */}
-      <div className="sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-xl border-b border-stone-200/80">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between">
+      <div className="sticky top-0 z-30 bg-[#FAF8F5]/92 backdrop-blur-xl border-b border-stone-200/80">
+        <div className="max-w-3xl mx-auto px-3 sm:px-6 h-13 sm:h-15 flex items-center justify-between gap-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-700 hover:text-stone-900 px-3 py-1.5 rounded-full hover:bg-stone-200/60 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-700 hover:text-stone-900 px-2.5 py-1.5 rounded-full hover:bg-stone-200/60 transition-colors shrink-0 whitespace-nowrap"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Hủy & Quay lại</span>
+            <span>Quay lại</span>
           </Link>
-          <span className="text-sm font-extrabold text-stone-900">
+          <span className="text-xs sm:text-sm font-extrabold text-stone-900 text-center truncate flex-1 px-1">
             {isAdmin ? 'Thêm quán mới (Admin)' : 'Đóng góp quán ăn vào Trấn Tuyên'}
           </span>
-          <div className="w-16" />
+          <div className="w-16 hidden sm:block shrink-0" />
         </div>
       </div>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-8">
+      <main className="max-w-2xl mx-auto px-3.5 sm:px-6 pt-5 sm:pt-8">
         {/* Banner thông báo chế độ */}
-        <div className="mb-6 p-4.5 rounded-2xl bg-white border border-stone-200/90 text-xs text-stone-700 flex items-center gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className="mb-6 p-4 rounded-2xl bg-white border border-stone-200/90 text-xs text-stone-700 flex items-center gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
           <div className="w-8 h-8 rounded-xl bg-[#163323]/10 text-[#163323] flex items-center justify-center shrink-0">
             <Bookmark className="w-4 h-4 text-[#C85A32]" />
           </div>
@@ -280,13 +280,13 @@ export default function AddRestaurantPage() {
           )}
 
           {/* 1. Upload ảnh quán ăn */}
-          <div className="bg-white rounded-[2rem] p-6 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
+          <div className="bg-white rounded-[2rem] p-4.5 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
             <h2 className="text-sm font-bold text-stone-900 flex items-center gap-1.5">
               <span>📸 Hình ảnh quán & Món ăn</span>
               <span className="text-xs font-normal text-stone-500">(Tối đa 6 ảnh)</span>
             </h2>
 
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 sm:gap-3">
               {photos.map((photo, index) => (
                 <div key={index} className="relative aspect-square rounded-2xl overflow-hidden bg-stone-100 border border-stone-200">
                   <Image src={photo.preview} alt="Xem trước" fill className="object-cover" />
@@ -322,7 +322,7 @@ export default function AddRestaurantPage() {
           </div>
 
           {/* 2. Thông tin cơ bản */}
-          <div className="bg-white rounded-[2rem] p-6 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
+          <div className="bg-white rounded-[2rem] p-4.5 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
             <h2 className="text-sm font-bold text-stone-900">🍜 Thông tin quán</h2>
 
             {/* Tên quán */}
@@ -340,25 +340,25 @@ export default function AddRestaurantPage() {
               />
             </div>
 
-            {/* Địa chỉ + Nút tìm toạ độ */}
+            {/* Địa chỉ + Nút tìm toạ độ (chống tràn trên mobile) */}
             <div>
               <label className="block text-xs font-semibold text-stone-700 mb-1.5">
                 Địa chỉ <span className="text-rose-500">*</span>
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   required
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="Ví dụ: 49 Bát Đàn, Cửa Đông, Hoàn Kiếm, Hà Nội"
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-[#163323] focus:ring-2 focus:ring-[#163323]/15"
+                  className="flex-1 min-w-0 px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-[#163323] focus:ring-2 focus:ring-[#163323]/15"
                 />
                 <button
                   type="button"
                   onClick={handleGeocode}
                   disabled={isGeocoding || !address.trim()}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer shrink-0"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer shrink-0 whitespace-nowrap"
                 >
                   {isGeocoding ? (
                     <Loader2 className="w-4 h-4 animate-spin text-[#163323]" />
@@ -378,8 +378,8 @@ export default function AddRestaurantPage() {
               )}
             </div>
 
-            {/* Đánh giá sao */}
-            <div className="pt-2 flex items-center justify-between">
+            {/* Đánh giá sao (responsive trên mobile) */}
+            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div>
                 <span className="block text-xs font-semibold text-stone-700 mb-0.5">Đánh giá sao</span>
                 <span className="text-xs text-stone-500">Mức độ ngon & hài lòng của bạn</span>
@@ -443,7 +443,7 @@ export default function AddRestaurantPage() {
           </div>
 
           {/* 3. Thẻ thể loại (Tags) */}
-          <div className="bg-white rounded-[2rem] p-6 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-3">
+          <div className="bg-white rounded-[2rem] p-4.5 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-3">
             <h2 className="text-sm font-bold text-stone-900">🏷️ Thể loại / Tag món</h2>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => {
@@ -467,7 +467,7 @@ export default function AddRestaurantPage() {
           </div>
 
           {/* 4. Ghi chú cá nhân */}
-          <div className="bg-white rounded-[2rem] p-6 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-2">
+          <div className="bg-white rounded-[2rem] p-4.5 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-2">
             <h2 className="text-sm font-bold text-stone-900">📝 Ghi chú cảm nhận & Món nên gọi</h2>
             <textarea
               rows={3}

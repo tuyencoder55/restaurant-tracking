@@ -14,11 +14,13 @@ import {
   Bookmark,
   Quote,
   Star,
+  Maximize2,
 } from 'lucide-react';
 import { getRestaurantById } from '@/lib/restaurants';
 import { Restaurant } from '@/types';
 import StarRating from '@/components/StarRating';
 import RestaurantMiniMap from '@/components/map/RestaurantMiniMap';
+import ImageLightbox from '@/components/ImageLightbox';
 
 export default function RestaurantDetailPage() {
   const params = useParams();
@@ -28,6 +30,7 @@ export default function RestaurantDetailPage() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
     async function loadDetail() {
@@ -121,15 +124,37 @@ export default function RestaurantDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* CỘT TRÁI: Gallery & MiniMap */}
           <div className="lg:col-span-7 space-y-5">
-            {/* Ảnh chính lớn */}
-            <div className="relative aspect-4/3 sm:aspect-16/10 rounded-3xl overflow-hidden bg-stone-100 shadow-[0_4px_24px_rgba(22,51,35,0.06)] border border-stone-200/90">
-              <Image
-                src={currentPhoto}
-                alt={restaurant.name}
-                fill
-                priority
-                className="object-cover"
-              />
+            {/* Ảnh chính lớn (Nhấp vào để xem toàn bộ 100% / đọc menu) */}
+            <div className="relative group">
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(true)}
+                className="relative w-full aspect-4/3 sm:aspect-16/10 rounded-3xl overflow-hidden bg-stone-900 shadow-[0_4px_24px_rgba(22,51,35,0.06)] border border-stone-200/90 block cursor-zoom-in text-left group-hover:shadow-lg transition-all"
+                title="Bấm để xem ảnh kích thước 100% và phóng to chi tiết"
+              >
+                <Image
+                  src={currentPhoto}
+                  alt={restaurant.name}
+                  fill
+                  priority
+                  className="object-cover group-hover:scale-102 transition-transform duration-500 ease-out"
+                />
+
+                {/* Gradient che nhẹ ở đáy */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+
+                {/* Badge thông báo bấm xem 100% / Menu */}
+                <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-10 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-stone-900/85 hover:bg-stone-900 text-white text-[11px] sm:text-xs font-bold backdrop-blur-md transition-all shadow-lg border border-white/15">
+                  <Maximize2 className="w-3.5 h-3.5 text-[#D4A373]" />
+                  <span>Xem ảnh 100% / Đọc Menu</span>
+                </div>
+
+                {allPhotos.length > 1 && (
+                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 px-2.5 py-1 rounded-full bg-black/60 text-white text-[11px] font-bold backdrop-blur-md border border-white/10">
+                    {selectedPhotoIndex + 1} / {allPhotos.length}
+                  </div>
+                )}
+              </button>
             </div>
 
             {/* Thumbnail Gallery */}
@@ -139,7 +164,13 @@ export default function RestaurantDetailPage() {
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => setSelectedPhotoIndex(idx)}
+                    onClick={() => {
+                      if (selectedPhotoIndex === idx) {
+                        setIsLightboxOpen(true);
+                      } else {
+                        setSelectedPhotoIndex(idx);
+                      }
+                    }}
                     className={`relative w-20 h-16 shrink-0 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
                       selectedPhotoIndex === idx
                         ? 'border-[#163323] shadow-md scale-102'
@@ -254,6 +285,15 @@ export default function RestaurantDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Lightbox hiển thị ảnh 100% không cắt, hỗ trợ zoom đọc menu */}
+      <ImageLightbox
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        photos={allPhotos}
+        initialIndex={selectedPhotoIndex}
+        title={restaurant.name}
+      />
     </div>
   );
 }

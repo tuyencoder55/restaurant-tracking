@@ -1,7 +1,7 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
-// Nén và giảm kích thước ảnh bằng Canvas API trước khi upload
-export async function compressImage(file: File, maxWidth = 1600, quality = 0.82): Promise<Blob> {
+// Nén và giảm kích thước ảnh bằng Canvas API trước khi upload (giữ độ nét cao cho menu/chữ)
+export async function compressImage(file: File, maxWidth = 2048, quality = 0.88): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();

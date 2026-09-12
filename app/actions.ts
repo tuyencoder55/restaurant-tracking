@@ -60,8 +60,10 @@ export async function uploadPhotoAction(formData: FormData): Promise<{ success: 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    const isMenu = formData.get('is_menu') === 'true';
+    const prefix = isMenu ? 'menu_' : 'food_';
     const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filePath = `uploads/${Date.now()}-${cleanFileName}`;
+    const filePath = `uploads/${prefix}${Date.now()}-${cleanFileName}`;
 
     const { error: uploadError } = await serverSupabase.storage
       .from('restaurant-photos')
@@ -152,14 +154,46 @@ export async function createRestaurantAction(
       await serverSupabase.from('restaurant_tags').insert(tagRows);
     }
 
-    // 3. Lưu ảnh
+    // 3. Lưu ảnh (Món ăn & Menu)
+    const allPhotoRows: { restaurant_id: string; photo_url: string; is_cover: boolean; photo_type?: string }[] = [];
+
     if (formData.photo_urls && formData.photo_urls.length > 0) {
-      const photoRows = formData.photo_urls.map((url, idx) => ({
-        restaurant_id: restaurantId,
-        photo_url: url,
-        is_cover: idx === 0,
-      }));
-      await serverSupabase.from('restaurant_photos').insert(photoRows);
+      formData.photo_urls.forEach((url, idx) => {
+        allPhotoRows.push({
+          restaurant_id: restaurantId,
+          photo_url: url,
+          is_cover: idx === 0,
+          photo_type: 'food',
+        });
+      });
+    }
+
+    if (formData.menu_photo_urls && formData.menu_photo_urls.length > 0) {
+      formData.menu_photo_urls.forEach((url) => {
+        allPhotoRows.push({
+          restaurant_id: restaurantId,
+          photo_url: url,
+          is_cover: false,
+          photo_type: 'menu',
+        });
+      });
+    }
+
+    if (allPhotoRows.length > 0) {
+      // Thử insert có trường photo_type trước
+      const { error: photoInsertError } = await serverSupabase
+        .from('restaurant_photos')
+        .insert(allPhotoRows);
+
+      if (photoInsertError) {
+        // Fallback tự động: nếu DB Supabase chưa kịp chạy câu lệnh thêm cột photo_type
+        const fallbackRows = allPhotoRows.map(({ restaurant_id, photo_url, is_cover }) => ({
+          restaurant_id,
+          photo_url,
+          is_cover,
+        }));
+        await serverSupabase.from('restaurant_photos').insert(fallbackRows);
+      }
     }
 
     revalidatePath('/');

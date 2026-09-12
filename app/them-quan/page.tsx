@@ -50,8 +50,9 @@ export default function AddRestaurantPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
-  // Photos State
-  const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
+  // Photos State: 5 ảnh món & 5 ảnh menu (tối đa 10 ảnh)
+  const [foodPhotos, setFoodPhotos] = useState<{ file: File; preview: string }[]>([]);
+  const [menuPhotos, setMenuPhotos] = useState<{ file: File; preview: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -135,20 +136,36 @@ export default function AddRestaurantPage() {
     );
   };
 
-  // Chọn ảnh từ máy
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Chọn ảnh món ăn từ máy (Tối đa 5 ảnh)
+  const handleFoodPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       const newPhotos = newFiles.map((file) => ({
         file,
         preview: URL.createObjectURL(file),
       }));
-      setPhotos((prev) => [...prev, ...newPhotos].slice(0, 6));
+      setFoodPhotos((prev) => [...prev, ...newPhotos].slice(0, 5));
     }
   };
 
-  const handleRemovePhoto = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
+  const handleRemoveFoodPhoto = (index: number) => {
+    setFoodPhotos((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Chọn ảnh menu từ máy (Tối đa 5 ảnh)
+  const handleMenuPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      const newPhotos = newFiles.map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+      }));
+      setMenuPhotos((prev) => [...prev, ...newPhotos].slice(0, 5));
+    }
+  };
+
+  const handleRemoveMenuPhoto = (index: number) => {
+    setMenuPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
   const toggleTag = (tagId: string) => {
@@ -173,24 +190,43 @@ export default function AddRestaurantPage() {
     setErrorMessage('');
 
     try {
-      // 1. Upload các ảnh đã chọn
-      const uploadedUrls: string[] = [];
-      for (const p of photos) {
+      // 1. Upload các ảnh món ăn & không gian
+      const uploadedFoodUrls: string[] = [];
+      for (const p of foodPhotos) {
         try {
           const compressedBlob = await compressImage(p.file);
           const uploadData = new FormData();
           uploadData.append('file', compressedBlob, p.file.name);
+          uploadData.append('is_menu', 'false');
 
           const uploadResult = await uploadPhotoAction(uploadData);
           if (uploadResult.success && uploadResult.url) {
-            uploadedUrls.push(uploadResult.url);
+            uploadedFoodUrls.push(uploadResult.url);
           }
         } catch (uploadErr) {
-          console.warn('Không thể tải ảnh này lên:', uploadErr);
+          console.warn('Không thể tải ảnh món ăn lên:', uploadErr);
         }
       }
 
-      // 2. Lưu vào CSDL Supabase
+      // 2. Upload các ảnh menu & bảng giá
+      const uploadedMenuUrls: string[] = [];
+      for (const p of menuPhotos) {
+        try {
+          const compressedBlob = await compressImage(p.file);
+          const uploadData = new FormData();
+          uploadData.append('file', compressedBlob, p.file.name);
+          uploadData.append('is_menu', 'true');
+
+          const uploadResult = await uploadPhotoAction(uploadData);
+          if (uploadResult.success && uploadResult.url) {
+            uploadedMenuUrls.push(uploadResult.url);
+          }
+        } catch (uploadErr) {
+          console.warn('Không thể tải ảnh menu lên:', uploadErr);
+        }
+      }
+
+      // 3. Lưu vào CSDL Supabase
       const result = await createRestaurantAction({
         name: name.trim(),
         address: address.trim(),
@@ -203,7 +239,8 @@ export default function AddRestaurantPage() {
         is_favorite: isFavorite,
         status: autoApprove && isAdmin ? 'approved' : 'pending',
         tag_ids: selectedTagIds,
-        photo_urls: uploadedUrls,
+        photo_urls: uploadedFoodUrls,
+        menu_photo_urls: uploadedMenuUrls,
       });
 
       if (result.success) {
@@ -247,7 +284,8 @@ export default function AddRestaurantPage() {
                 setPriceRange('');
                 setNote('');
                 setGoogleMapsUrl('');
-                setPhotos([]);
+                setFoodPhotos([]);
+                setMenuPhotos([]);
                 setSelectedTagIds([]);
                 setIsSuccess(false);
               }}
@@ -323,41 +361,92 @@ export default function AddRestaurantPage() {
             </div>
           )}
 
-          {/* 1. Upload ảnh quán ăn */}
+          {/* 1. Upload ảnh: Món ăn & Không gian (Tối đa 5) */}
           <div className="bg-white rounded-[2rem] p-4.5 sm:p-7 border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
-            <h2 className="text-sm font-bold text-stone-900 flex items-center gap-1.5">
-              <span>📸 Hình ảnh quán & Món ăn</span>
-              <span className="text-xs font-normal text-stone-500">(Tối đa 6 ảnh)</span>
-            </h2>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-stone-900 flex items-center gap-1.5">
+                  <span>📸 Ảnh món ăn & Không gian quán</span>
+                  <span className="text-xs font-normal text-stone-500">({foodPhotos.length}/5 ảnh)</span>
+                </h2>
+                <p className="text-[11px] text-stone-500 mt-0.5">Ảnh đầu tiên sẽ được chọn làm ảnh bìa đại diện của quán</p>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 sm:gap-3">
-              {photos.map((photo, index) => (
-                <div key={index} className="relative aspect-square rounded-2xl overflow-hidden bg-stone-100 border border-stone-200">
-                  <Image src={photo.preview} alt="Xem trước" fill className="object-cover" />
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 sm:gap-3">
+              {foodPhotos.map((photo, index) => (
+                <div key={index} className="relative aspect-square rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 shadow-xs">
+                  <Image src={photo.preview} alt={`Món ${index + 1}`} fill className="object-cover" />
                   <button
                     type="button"
-                    onClick={() => handleRemovePhoto(index)}
-                    className="absolute top-1.5 right-1.5 p-1 bg-stone-900/70 hover:bg-stone-900 text-white rounded-full transition-colors cursor-pointer"
+                    onClick={() => handleRemoveFoodPhoto(index)}
+                    className="absolute top-1.5 right-1.5 p-1 bg-stone-900/75 hover:bg-stone-900 text-white rounded-full transition-colors cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                   {index === 0 && (
-                    <span className="absolute bottom-1.5 left-1.5 text-[10px] bg-[#163323] text-[#D4A373] px-2 py-0.5 rounded-md font-bold">
+                    <span className="absolute bottom-1.5 left-1.5 text-[9px] bg-[#163323] text-[#D4A373] px-2 py-0.5 rounded-md font-bold shadow-xs">
                       Ảnh bìa
                     </span>
                   )}
                 </div>
               ))}
 
-              {photos.length < 6 && (
-                <label className="aspect-square rounded-2xl border-2 border-dashed border-stone-200 hover:border-[#163323]/50 bg-[#FAF8F5]/50 flex flex-col items-center justify-center cursor-pointer transition-colors p-2 text-center group">
-                  <UploadCloud className="w-6 h-6 text-stone-400 group-hover:text-[#163323] mb-1 transition-colors" />
-                  <span className="text-[11px] font-bold text-stone-600 group-hover:text-[#163323]">Chọn ảnh</span>
+              {foodPhotos.length < 5 && (
+                <label className="aspect-square rounded-2xl border-2 border-dashed border-stone-200 hover:border-[#163323]/50 bg-[#FAF8F5]/60 flex flex-col items-center justify-center cursor-pointer transition-colors p-2 text-center group">
+                  <UploadCloud className="w-5 h-5 text-stone-400 group-hover:text-[#163323] mb-1 transition-colors" />
+                  <span className="text-[11px] font-bold text-stone-600 group-hover:text-[#163323]">Thêm món</span>
                   <input
                     type="file"
                     multiple
                     accept="image/png, image/jpeg, image/webp"
-                    onChange={handleFileChange}
+                    onChange={handleFoodPhotoChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+
+          {/* 1.2. Upload ảnh: Menu & Bảng giá quán (Tối đa 5) */}
+          <div className="bg-white rounded-[2rem] p-4.5 sm:p-7 border border-[#C85A32]/20 shadow-[0_2px_12px_rgba(200,90,50,0.03)] space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-stone-900 flex items-center gap-1.5">
+                  <span className="text-[#C85A32]">📋</span>
+                  <span>Ảnh Menu & Bảng giá</span>
+                  <span className="text-xs font-normal text-stone-500">({menuPhotos.length}/5 ảnh)</span>
+                </h2>
+                <p className="text-[11px] text-stone-500 mt-0.5">Chụp các trang menu, đồ uống, combo... để người xem tra cứu 100% rõ nét</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 sm:gap-3">
+              {menuPhotos.map((photo, index) => (
+                <div key={index} className="relative aspect-square rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 shadow-xs">
+                  <Image src={photo.preview} alt={`Menu ${index + 1}`} fill className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveMenuPhoto(index)}
+                    className="absolute top-1.5 right-1.5 p-1 bg-stone-900/75 hover:bg-stone-900 text-white rounded-full transition-colors cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="absolute bottom-1.5 left-1.5 text-[9px] bg-[#C85A32] text-white px-2 py-0.5 rounded-md font-bold shadow-xs">
+                    Trang {index + 1}
+                  </span>
+                </div>
+              ))}
+
+              {menuPhotos.length < 5 && (
+                <label className="aspect-square rounded-2xl border-2 border-dashed border-[#C85A32]/30 hover:border-[#C85A32] bg-[#FAF8F5]/60 flex flex-col items-center justify-center cursor-pointer transition-colors p-2 text-center group">
+                  <UploadCloud className="w-5 h-5 text-stone-400 group-hover:text-[#C85A32] mb-1 transition-colors" />
+                  <span className="text-[11px] font-bold text-stone-600 group-hover:text-[#C85A32]">Thêm Menu</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handleMenuPhotoChange}
                     className="hidden"
                   />
                 </label>

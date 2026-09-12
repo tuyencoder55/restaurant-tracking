@@ -31,11 +31,7 @@ export async function getRestaurants(): Promise<Restaurant[]> {
             name
           )
         ),
-        restaurant_photos (
-          id,
-          photo_url,
-          is_cover
-        )
+        restaurant_photos (*)
       `)
       .order('created_at', { ascending: false });
 
@@ -59,8 +55,9 @@ export async function getRestaurants(): Promise<Restaurant[]> {
         restaurant_id: item.id,
         photo_url: p.photo_url,
         is_cover: p.is_cover || false,
+        photo_type: p.photo_type || (p.photo_url?.includes('menu_') ? 'menu' : 'food'),
       }));
-      const coverPhoto = photos.find((p) => p.is_cover)?.photo_url || photos[0]?.photo_url || null;
+      const coverPhoto = photos.find((p) => p.is_cover)?.photo_url || photos.find((p) => p.photo_type !== 'menu')?.photo_url || photos[0]?.photo_url || null;
 
       return {
         id: item.id,
@@ -113,11 +110,7 @@ export async function getRestaurantById(id: string): Promise<Restaurant | null> 
             name
           )
         ),
-        restaurant_photos (
-          id,
-          photo_url,
-          is_cover
-        )
+        restaurant_photos (*)
       `)
       .eq('id', id)
       .single();
@@ -132,8 +125,9 @@ export async function getRestaurantById(id: string): Promise<Restaurant | null> 
       restaurant_id: data.id,
       photo_url: p.photo_url,
       is_cover: p.is_cover || false,
+      photo_type: p.photo_type || (p.photo_url?.includes('menu_') ? 'menu' : 'food'),
     }));
-    const coverPhoto = photos.find((p) => p.is_cover)?.photo_url || photos[0]?.photo_url || null;
+    const coverPhoto = photos.find((p) => p.is_cover)?.photo_url || photos.find((p) => p.photo_type !== 'menu')?.photo_url || photos[0]?.photo_url || null;
 
     return {
       id: data.id,

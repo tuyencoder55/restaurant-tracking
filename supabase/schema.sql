@@ -44,6 +44,7 @@ create table if not exists restaurant_photos (
   restaurant_id uuid references restaurants(id) on delete cascade,
   photo_url text not null,
   is_cover boolean default false, -- Đánh dấu ảnh đại diện chính
+  photo_type text default 'food', -- 'food' (ảnh món ăn/quán) hoặc 'menu' (ảnh menu/bảng giá)
   created_at timestamptz default now()
 );
 
@@ -126,10 +127,13 @@ select 'a0000004-0000-0000-0000-000000000004', id from tags where name = 'Cà ph
 on conflict do nothing;
 
 -- Ảnh mẫu đại diện (dùng ảnh đồ ăn chất lượng cao Unsplash)
-insert into restaurant_photos (restaurant_id, photo_url, is_cover)
+insert into restaurant_photos (restaurant_id, photo_url, is_cover, photo_type)
 values
-  ('a0000001-0000-0000-0000-000000000001', 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80', true),
-  ('a0000002-0000-0000-0000-000000000002', 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80', true),
-  ('a0000003-0000-0000-0000-000000000003', 'https://images.unsplash.com/photo-1547496502-affa22d38842?w=800&q=80', true),
-  ('a0000004-0000-0000-0000-000000000004', 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&q=80', true)
+  ('a0000001-0000-0000-0000-000000000001', 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80', true, 'food'),
+  ('a0000002-0000-0000-0000-000000000002', 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80', true, 'food'),
+  ('a0000003-0000-0000-0000-000000000003', 'https://images.unsplash.com/photo-1547496502-affa22d38842?w=800&q=80', true, 'food'),
+  ('a0000004-0000-0000-0000-000000000004', 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&q=80', true, 'food')
 on conflict do nothing;
+
+-- CÂU LỆNH NÂNG CẤP DÀNH CHO CƠ SỞ DỮ LIỆU ĐANG CHẠY (NẾU ĐÃ CÓ BẢNG RESTAURANT_PHOTOS TỪ TRƯỚC):
+-- alter table restaurant_photos add column if not exists photo_type text default 'food';

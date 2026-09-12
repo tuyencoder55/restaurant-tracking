@@ -77,7 +77,15 @@ export default function RestaurantDetailPage() {
     ? restaurant.photos.map((p) => p.photo_url)
     : [restaurant.cover_photo || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80'];
 
+  const foodPhotos = restaurant.photos
+    ? restaurant.photos.filter((p) => p.photo_type !== 'menu' && !p.photo_url.includes('menu_')).map((p) => p.photo_url)
+    : [];
+  const menuPhotos = restaurant.photos
+    ? restaurant.photos.filter((p) => p.photo_type === 'menu' || p.photo_url.includes('menu_')).map((p) => p.photo_url)
+    : [];
+
   const currentPhoto = allPhotos[selectedPhotoIndex] || allPhotos[0];
+  const isCurrentPhotoMenu = currentPhoto?.includes('menu_');
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] pb-20">
@@ -146,7 +154,7 @@ export default function RestaurantDetailPage() {
                 {/* Badge thông báo bấm xem 100% / Menu */}
                 <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-10 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-stone-900/85 hover:bg-stone-900 text-white text-[11px] sm:text-xs font-bold backdrop-blur-md transition-all shadow-lg border border-white/15">
                   <Maximize2 className="w-3.5 h-3.5 text-[#D4A373]" />
-                  <span>Xem ảnh 100% / Đọc Menu</span>
+                  <span>{isCurrentPhotoMenu ? 'Xem Menu 100% không cắt' : 'Xem ảnh 100% / Phóng to'}</span>
                 </div>
 
                 {allPhotos.length > 1 && (
@@ -160,26 +168,61 @@ export default function RestaurantDetailPage() {
             {/* Thumbnail Gallery */}
             {allPhotos.length > 1 && (
               <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
-                {allPhotos.map((url, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      if (selectedPhotoIndex === idx) {
-                        setIsLightboxOpen(true);
-                      } else {
-                        setSelectedPhotoIndex(idx);
-                      }
-                    }}
-                    className={`relative w-20 h-16 shrink-0 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
-                      selectedPhotoIndex === idx
-                        ? 'border-[#163323] shadow-md scale-102'
-                        : 'border-transparent opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <Image src={url} alt={`Ảnh ${idx + 1}`} fill className="object-cover" />
-                  </button>
-                ))}
+                {allPhotos.map((url, idx) => {
+                  const isMenuThumb = url.includes('menu_');
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        if (selectedPhotoIndex === idx) {
+                          setIsLightboxOpen(true);
+                        } else {
+                          setSelectedPhotoIndex(idx);
+                        }
+                      }}
+                      className={`relative w-20 h-16 shrink-0 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
+                        selectedPhotoIndex === idx
+                          ? 'border-[#163323] shadow-md scale-102'
+                          : 'border-transparent opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <Image src={url} alt={`Ảnh ${idx + 1}`} fill className="object-cover" />
+                      {isMenuThumb && (
+                        <span className="absolute bottom-1 right-1 text-[8px] bg-[#C85A32] text-white px-1.5 py-0.2 rounded font-bold uppercase shadow-xs">
+                          Menu
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Banner nổi bật xem Menu quán */}
+            {menuPhotos.length > 0 && (
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-[#163323] text-white flex items-center justify-between gap-3 shadow-md border border-white/10">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-xl">
+                    📋
+                  </div>
+                  <div className="truncate">
+                    <h3 className="text-xs sm:text-sm font-bold truncate">Thực đơn & Bảng giá quán</h3>
+                    <p className="text-[11px] text-stone-300">Đã cập nhật {menuPhotos.length} trang thực đơn rõ nét</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const firstMenuIdx = allPhotos.findIndex((u) => u.includes('menu_'));
+                    setSelectedPhotoIndex(firstMenuIdx >= 0 ? firstMenuIdx : 0);
+                    setIsLightboxOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#C85A32] hover:bg-[#b54f2a] active:scale-95 text-white text-xs font-bold shadow-sm transition-all shrink-0 cursor-pointer"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  <span>Xem Menu</span>
+                </button>
               </div>
             )}
 

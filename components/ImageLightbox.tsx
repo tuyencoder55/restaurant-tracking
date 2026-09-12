@@ -189,6 +189,15 @@ export default function ImageLightbox({
           <span className="bg-white/15 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider">
             {currentIndex + 1} / {photos.length}
           </span>
+          {currentPhotoUrl?.includes('menu_') ? (
+            <span className="bg-[#C85A32] text-white px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase shadow-xs">
+              📋 Menu
+            </span>
+          ) : (
+            <span className="bg-emerald-900/80 text-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+              🍜 Món & Quán
+            </span>
+          )}
           {title && (
             <span className="hidden sm:inline-block text-stone-300 truncate max-w-xs font-semibold">
               {title}
@@ -336,6 +345,11 @@ export default function ImageLightbox({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+              {url.includes('menu_') && (
+                <span className="absolute bottom-0 inset-x-0 bg-[#C85A32]/90 text-[8px] text-white text-center font-bold uppercase leading-tight py-0.5">
+                  Menu
+                </span>
+              )}
             </button>
           ))}
         </div>

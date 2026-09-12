@@ -36,6 +36,7 @@ export interface RestaurantPhoto {
   restaurant_id?: string;
   photo_url: string;
   is_cover: boolean;
+  photo_type?: 'food' | 'menu';
   created_at?: string;
 }
 
@@ -52,5 +53,6 @@ export interface RestaurantFormData {
   is_favorite?: boolean;
   status?: 'pending' | 'approved' | 'rejected';
   tag_ids: string[];
-  photo_urls: string[];
+  photo_urls: string[]; // Ảnh món ăn & không gian quán
+  menu_photo_urls?: string[]; // Ảnh Menu / Bảng giá quán
 }
